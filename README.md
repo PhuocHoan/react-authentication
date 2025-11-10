@@ -4,9 +4,7 @@ A secure React single-page application implementing JWT authentication with acce
 
 ## 🌐 Live Demo
 
-**Production URL:** [https://your-app-url.vercel.app](https://your-app-url.vercel.app)
-
-_(Update this URL after deploying to Vercel)_
+**Production URL:** [https://react-authentication-delta-pink.vercel.app/](https://react-authentication-delta-pink.vercel.app/)
 
 ## 🚀 Features
 
@@ -121,7 +119,7 @@ The mock API simulates:
 
 ## 📁 Project Structure
 
-```
+```text
 src/
 ├── api/                 # API client and auth API
 │   ├── client.ts       # Axios instance with interceptors
