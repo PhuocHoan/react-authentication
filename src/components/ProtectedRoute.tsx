@@ -1,37 +1,39 @@
-/**
- * ProtectedRoute component
- * Restricts access to authenticated users only
- */
-
-import { Navigate, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import type { ReactNode } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { Navigate, useLocation } from 'react-router-dom';
+import { tokenStorage } from '../utils/tokenStorage';
 
 interface ProtectedRouteProps {
   children: ReactNode;
+  requiredRole?: string; // Reserved for future role-based access control
 }
 
-export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading } = useAuth();
+export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const location = useLocation();
+  const isAuthenticated = tokenStorage.isAuthenticated();
 
-  // Show loading state while checking authentication
-  if (isLoading) {
-    return (
-      <div className='flex min-h-screen items-center justify-center'>
-        <div className='flex flex-col items-center gap-4'>
-          <div className='h-12 w-12 animate-spin rounded-full border-4 border-blue-500 border-t-transparent'></div>
-          <p className='text-gray-600'>Loading...</p>
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    // Listen for logout events from other tabs
+    const handleLogout = () => {
+      window.location.href = '/login';
+    };
 
-  // Redirect to login if not authenticated
+    window.addEventListener('auth-logout', handleLogout);
+    return () => {
+      window.removeEventListener('auth-logout', handleLogout);
+    };
+  }, []);
+
   if (!isAuthenticated) {
+    // Redirect to login with return url
     return <Navigate to='/login' state={{ from: location }} replace />;
   }
 
-  // Render children if authenticated
+  // TODO: Add role-based access control check here if needed
+  // const user = useAuth().user;
+  // if (requiredRole && user?.role !== requiredRole) {
+  //   return <Navigate to="/unauthorized" replace />;
+  // }
+
   return <>{children}</>;
-}
+};

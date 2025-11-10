@@ -1,70 +1,71 @@
-/**
- * Login Page
- * Implements login form with React Hook Form validation
- */
-
-import { useForm } from 'react-hook-form';
 import { useEffect } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { useLogin } from '../hooks/useAuthQuery';
-import { useAuth } from '../context/AuthContext';
+import { useForm } from 'react-hook-form';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 import type { LoginCredentials } from '../types/auth';
 
-export function LoginPage() {
+export const LoginPage = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { login, isLoading, error, isAuthenticated } = useAuth();
+  
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginCredentials>();
-
-  const loginMutation = useLogin();
-  const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
+  } = useForm<LoginCredentials>({
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
 
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      const from =
-        (location.state as { from?: { pathname: string } })?.from?.pathname ||
-        '/dashboard';
+      const from = (location.state as { from?: Location })?.from?.pathname || '/dashboard';
       navigate(from, { replace: true });
     }
   }, [isAuthenticated, navigate, location]);
 
-  const onSubmit = async (data: LoginCredentials) => {
-    try {
-      await loginMutation.mutateAsync(data);
-    } catch (error) {
-      // Error is handled by the mutation
-      console.error('Login error:', error);
-    }
+  // Listen for logout events from other tabs
+  useEffect(() => {
+    const handleLogout = () => {
+      // User was logged out in another tab, stay on login page
+      window.location.reload();
+    };
+
+    window.addEventListener('auth-logout', handleLogout);
+    return () => {
+      window.removeEventListener('auth-logout', handleLogout);
+    };
+  }, []);
+
+  const onSubmit = (data: LoginCredentials) => {
+    login(data);
   };
 
   return (
-    <div className='flex min-h-screen items-center justify-center bg-linear-to-br from-blue-50 to-indigo-100 px-4'>
-      <div className='w-full max-w-md'>
-        <div className='rounded-2xl bg-white p-8 shadow-xl'>
-          {/* Header */}
-          <div className='mb-8 text-center'>
-            <h1 className='text-3xl font-bold text-gray-900'>Welcome Back</h1>
-            <p className='mt-2 text-gray-600'>Sign in to your account</p>
-          </div>
-
-          {/* Login Form */}
-          <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
-            {/* Email Field */}
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 to-indigo-100 px-4">
+      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-xl">
+        <div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Sign in to your account
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            Use your email and password to login
+          </p>
+        </div>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
+          <div className="rounded-md shadow-sm space-y-4">
             <div>
-              <label
-                htmlFor='email'
-                className='block text-sm font-medium text-gray-700'
-              >
-                Email Address
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                Email address
               </label>
               <input
-                id='email'
-                type='email'
-                autoComplete='email'
+                id="email"
+                type="email"
+                autoComplete="email"
                 {...register('email', {
                   required: 'Email is required',
                   pattern: {
@@ -72,32 +73,21 @@ export function LoginPage() {
                     message: 'Invalid email address',
                   },
                 })}
-                className={`mt-1 block w-full rounded-lg border px-4 py-3 text-gray-900 placeholder-gray-400 transition focus:outline-none focus:ring-2 ${
-                  errors.email
-                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-                    : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
-                }`}
-                placeholder='you@example.com'
+                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="Email address"
               />
               {errors.email && (
-                <p className='mt-1 text-sm text-red-600'>
-                  {errors.email.message}
-                </p>
+                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
               )}
             </div>
-
-            {/* Password Field */}
             <div>
-              <label
-                htmlFor='password'
-                className='block text-sm font-medium text-gray-700'
-              >
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                 Password
               </label>
               <input
-                id='password'
-                type='password'
-                autoComplete='current-password'
+                id="password"
+                type="password"
+                autoComplete="current-password"
                 {...register('password', {
                   required: 'Password is required',
                   minLength: {
@@ -105,89 +95,47 @@ export function LoginPage() {
                     message: 'Password must be at least 6 characters',
                   },
                 })}
-                className={`mt-1 block w-full rounded-lg border px-4 py-3 text-gray-900 placeholder-gray-400 transition focus:outline-none focus:ring-2 ${
-                  errors.password
-                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-                    : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
-                }`}
-                placeholder='Enter your password'
+                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="Password"
               />
               {errors.password && (
-                <p className='mt-1 text-sm text-red-600'>
-                  {errors.password.message}
-                </p>
+                <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
               )}
             </div>
+          </div>
 
-            {/* Error Message */}
-            {loginMutation.isError && (
-              <div className='rounded-lg bg-red-50 p-4'>
-                <p className='text-sm text-red-800'>
-                  {loginMutation.error instanceof Error
-                    ? loginMutation.error.message
-                    : 'Invalid email or password. Please try again.'}
-                </p>
+          {error && (
+            <div className="rounded-md bg-red-50 p-4">
+              <div className="flex">
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-red-800">
+                    {error instanceof Error ? error.message : 'Login failed. Please try again.'}
+                  </h3>
+                </div>
               </div>
-            )}
-
-            {/* Submit Button */}
-            <button
-              type='submit'
-              disabled={loginMutation.isPending}
-              className='w-full rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
-            >
-              {loginMutation.isPending ? (
-                <span className='flex items-center justify-center'>
-                  <svg
-                    className='mr-2 h-5 w-5 animate-spin'
-                    viewBox='0 0 24 24'
-                  >
-                    <circle
-                      className='opacity-25'
-                      cx='12'
-                      cy='12'
-                      r='10'
-                      stroke='currentColor'
-                      strokeWidth='4'
-                      fill='none'
-                    />
-                    <path
-                      className='opacity-75'
-                      fill='currentColor'
-                      d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
-                    />
-                  </svg>
-                  Signing in...
-                </span>
-              ) : (
-                'Sign In'
-              )}
-            </button>
-          </form>
-
-          {/* Demo Credentials */}
-          <div className='mt-6 rounded-lg bg-blue-50 p-4'>
-            <p className='text-sm font-semibold text-blue-900'>
-              Demo Credentials:
-            </p>
-            <div className='mt-2 space-y-1 text-sm text-blue-800'>
-              <p>• admin@example.com / admin123</p>
-              <p>• user@example.com / user123</p>
-              <p>• demo@example.com / demo123</p>
             </div>
+          )}
+
+          <div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {isLoading ? 'Signing in...' : 'Sign in'}
+            </button>
           </div>
 
-          {/* Footer */}
-          <div className='mt-6 text-center text-sm text-gray-600'>
-            <Link
-              to='/'
-              className='font-medium text-blue-600 hover:text-blue-500'
-            >
-              ← Back to Home
-            </Link>
+          <div className="text-center text-sm text-gray-600">
+            <p>Demo credentials:</p>
+            <p className="mt-1 font-mono text-xs">
+              email: demo@example.com<br />
+              password: password123
+            </p>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );
-}
+};
+

@@ -1,278 +1,306 @@
-# React Authentication with JWT (Access + Refresh Tokens)
+# React Authentication with JWT (Access + Refresh)
 
-A complete React authentication system implementing JWT-based authentication with access and refresh tokens, built with modern best practices and the latest technologies.
+A secure React single-page application implementing JWT authentication with access tokens and refresh tokens. Built with React 19, TypeScript, Tailwind CSS, React Query, React Hook Form, and Axios.
 
-## 🚀 Live Demo
+## 🌐 Live Demo
 
-**Deployment URL:** [Your Vercel Deployment URL Here]
+**Production URL:** [https://your-app-url.vercel.app](https://your-app-url.vercel.app)
 
-> **Note:** Replace the above placeholder with your actual Vercel deployment URL after deploying.
+_(Update this URL after deploying to Vercel)_
 
-## ✨ Features
+## 🚀 Features
 
-- ✅ **Secure JWT Authentication** - Access and refresh token pattern
-- ✅ **Automatic Token Refresh** - Seamless token refresh using Axios interceptors
-- ✅ **Protected Routes** - Route guards for authenticated users only
-- ✅ **Form Validation** - React Hook Form with comprehensive validation
-- ✅ **State Management** - React Query for server state management
-- ✅ **Mock API** - MSW (Mock Service Worker) for development and demo
-- ✅ **Modern UI** - Tailwind CSS 4 with responsive design
-- ✅ **TypeScript** - Full type safety
-- ✅ **Error Handling** - Comprehensive error handling and user feedback
-- ✅ **React 19** - Latest React with React Compiler
+### Core Requirements ✅
 
-### 🌟 Stretch Goals (Bonus Features)
+- **Authentication Flow**: Complete login and logout mechanism
+- **Token Management**:
+  - Access tokens stored in memory (session only)
+  - Refresh tokens stored in localStorage (persistent)
+  - Automatic token cleanup on logout
+- **Axios Configuration**:
+  - Automatic token attachment to requests
+  - 401 error handling with automatic token refresh
+  - Seamless token refresh flow
+- **React Query Integration**:
+  - Mutations for login/logout
+  - Queries for user data
+  - Automatic query invalidation on auth state changes
+- **React Hook Form**:
+  - Form validation for login
+  - Error handling and display
+- **Protected Routes**: Route protection with automatic redirect to login
+- **User Interface**:
+  - Beautiful login page
+  - Dashboard with user information
+  - Logout functionality
+- **Error Handling**: Comprehensive error messages for all scenarios
+- **Public Hosting**: Ready for deployment on Vercel
 
-- ✅ **Silent Token Refresh** - Automatic token refresh before expiration (13-minute interval)
-- ✅ **Cookie-Based Storage** - Secure cookie storage for refresh tokens (SameSite strict, secure flag)
-- ✅ **Multi-Tab Synchronization** - Cross-tab authentication sync using storage events
-- ✅ **Role-Based Access Control** - Admin, user, and moderator roles with protected routes
+### Stretch Goals ✅
+
+- **Silent Token Refresh**: Tokens are refreshed automatically 2 minutes before expiration
+- **Multi-tab Synchronization**: Logout and token updates sync across browser tabs
+- **Role-based Access Control**: Implementation ready for role-based routes (Admin page included)
+- **Mock API**: Built-in mock API for development and testing
 
 ## 🛠️ Tech Stack
 
-- **React 19.2** - Latest React with React Compiler for optimization
-- **TypeScript** - Type safety and better developer experience
-- **Vite** - Lightning-fast build tool
-- **Tailwind CSS 4.1.17** - Modern utility-first CSS framework
-- **React Router DOM 7** - Client-side routing
+- **React 19** - Latest React with React Compiler
+- **TypeScript** - Type-safe development
+- **Tailwind CSS 4** - Modern utility-first CSS
 - **React Query (TanStack Query)** - Server state management
-- **React Hook Form 7.66** - Form handling and validation
+- **React Hook Form** - Form handling and validation
 - **Axios** - HTTP client with interceptors
-- **MSW (Mock Service Worker)** - API mocking for development
+- **React Router** - Client-side routing
+- **Vite** - Fast build tool and dev server
 
-## 📋 Prerequisites
+## 📦 Installation
 
-- Node.js 22+
-- pnpm (recommended) or npm
+### Prerequisites
 
-## 🚀 Getting Started
+- Node.js 18+
+- pnpm (recommended) or npm/yarn
 
-### 1. Clone the Repository
+### Setup
 
-```bash
-git clone <repository-url>
-cd react-authentication
-```
+1. **Clone the repository**
 
-### 2. Install Dependencies
+   ```bash
+   git clone <repository-url>
+   cd react-authentication
+   ```
 
-```bash
-pnpm install
-```
+2. **Install dependencies**
 
-### 3. Environment Configuration
+   ```bash
+   pnpm install
+   ```
 
-The project comes with pre-configured environment files:
+3. **Configure environment variables**
 
-- `.env.development` - Development environment
-- `.env.production` - Production environment
+   Create `.env.development` for local development:
 
-**For Mock API (Default):**
-No changes needed. The app uses MSW to simulate backend API.
+   ```env
+   VITE_API_BASE_URL=http://localhost:3001/api
+   VITE_USE_MOCK_API=true
+   ```
 
-**For Real Backend API:**
-Update the environment files:
+   Create `.env.production` for production:
 
-```env
-VITE_API_BASE_URL=https://your-backend-api.com/api
-VITE_USE_MOCK_API=false
-```
+   ```env
+   VITE_API_BASE_URL=https://your-api-url.com/api
+   VITE_USE_MOCK_API=false
+   ```
 
-### 4. Run Development Server
+4. **Start development server**
 
-```bash
-pnpm dev
-```
+   ```bash
+   pnpm dev
+   ```
 
-The application will be available at `http://localhost:5173`
+5. **Open your browser**
+   Navigate to `http://localhost:5173`
 
-### 5. Build for Production
+## 🧪 Testing with Mock API
 
-```bash
-pnpm build
-```
+The application includes a built-in mock API for testing. Demo credentials:
 
-### 6. Preview Production Build
+- **Email**: `demo@example.com`
+- **Password**: `password123`
 
-```bash
-pnpm preview
-```
+- **Admin User**:
+  - **Email**: `admin@example.com`
+  - **Password**: `password123`
 
-## 🔐 Demo Credentials
+The mock API simulates:
 
-Use these credentials to test the application:
-
-- **Admin User:**
-
-  - Email: `admin@example.com`
-  - Password: `admin123`
-  - Role: `admin` (can access Admin Panel)
-
-- **Regular User:**
-
-  - Email: `user@example.com`
-  - Password: `user123`
-  - Role: `user` (standard access)
-
-- **Demo User:**
-  - Email: `demo@example.com`
-  - Password: `demo123`
-  - Role: `user` (standard access)
+- Login with JWT token generation
+- Token refresh
+- Protected user data endpoints
+- Token expiration handling
 
 ## 📁 Project Structure
 
-```text
+```
 src/
-├── api/              # API client and authentication
-│   ├── client.ts     # Axios instance with interceptors
-│   └── auth.ts       # Authentication API functions
-├── components/       # Reusable components
-│   ├── ProtectedRoute.tsx
-│   └── RoleBasedRoute.tsx
-├── context/          # React Context
-│   └── AuthContext.tsx
-├── hooks/            # Custom hooks
-│   └── useAuthQuery.ts
-├── mocks/            # MSW mock API
-│   ├── browser.ts
-│   └── handlers.ts
-├── pages/            # Pages
-│   ├── HomePage.tsx
-│   ├── LoginPage.tsx
-│   ├── DashboardPage.tsx
-│   └── AdminPage.tsx
-├── types/            # TypeScript types
-│   └── auth.ts
-├── utils/            # Utilities
-│   ├── tokenStorage.ts
-│   ├── cookies.ts
-│   └── tokenRefreshScheduler.ts
-├── App.tsx
-├── main.tsx
-└── index.css
+├── api/                 # API client and auth API
+│   ├── client.ts       # Axios instance with interceptors
+│   └── auth.ts         # Authentication API calls
+├── components/         # React components
+│   ├── ProtectedRoute.tsx    # Route protection
+│   └── RoleBasedRoute.tsx    # Role-based route protection
+├── hooks/              # Custom React hooks
+│   └── useAuth.ts      # Authentication hook
+├── mocks/              # Mock API for development
+│   ├── handlers.ts     # Mock API handlers
+│   └── browser.ts      # Browser mock setup
+├── pages/              # Page components
+│   ├── LoginPage.tsx   # Login page
+│   ├── DashboardPage.tsx # Dashboard
+│   ├── AdminPage.tsx   # Admin page (role-based)
+│   ├── HomePage.tsx    # Home page
+│   └── UnauthorizedPage.tsx # Unauthorized page
+├── types/              # TypeScript type definitions
+│   └── auth.ts         # Authentication types
+└── utils/              # Utility functions
+    ├── tokenStorage.ts        # Token storage utilities
+    └── tokenRefreshScheduler.ts # Token refresh scheduler
 ```
 
-## 🔑 Authentication Flow
+## 🔐 Authentication Flow
 
-### Authentication Process
+1. **Login**: User submits credentials via React Hook Form
+2. **Token Storage**:
+   - Access token stored in memory
+   - Refresh token stored in localStorage
+3. **Automatic Token Refresh**:
+   - Tokens refreshed 2 minutes before expiration
+   - Automatic refresh on 401 responses
+4. **Protected Routes**: Access token validated before route access
+5. **Logout**: All tokens cleared, user redirected to login
 
-1. User submits credentials via React Hook Form
-2. Server returns access and refresh tokens
-3. Access token stored in memory, refresh token in secure cookies
-4. User redirected to dashboard
+## 🚀 Deployment
 
-### Token Management
+### Deploy to Vercel
 
-- **Access Token:**
+1. **Install Vercel CLI** (optional)
 
-  - Stored in memory (not in cookies/localStorage for security)
-  - Expires in 15 minutes
-  - Automatically attached to API requests via Axios interceptor
-  - Silently refreshed 2 minutes before expiration
+   ```bash
+   pnpm add -g vercel
+   ```
 
-- **Refresh Token:**
+2. **Deploy**
 
-  - Stored in secure cookies (SameSite strict, secure flag)
-  - Expires in 7 days
-  - Used to obtain new access tokens
-  - Automatically broadcast to other tabs via storage events
+   ```bash
+   vercel
+   ```
 
-### Token Refresh
+3. **Configure Environment Variables in Vercel**
 
-- **Automatic**: Axios interceptor catches 401 errors and refreshes tokens
-- **Proactive**: Silent refresh every 13 minutes (before 15-min expiry)
-- **Multi-tab**: Logout in one tab logs out all tabs
+   - Go to your project settings in Vercel
+   - Add environment variables:
+     - `VITE_API_BASE_URL`: Your production API URL
+     - `VITE_USE_MOCK_API`: `false`
 
-## 🌟 Bonus Features (Stretch Goals)
+4. **Update Production URL**
+   - Update the production URL in this README
+   - Update the URL in `SELF_EVALUATION.md`
 
-### Silent Token Refresh
+### Alternative: Deploy via Vercel Dashboard
 
-Proactively refreshes tokens every 13 minutes (before 15-min expiry) to prevent unexpected logouts.
+1. Push your code to GitHub
+2. Import the repository in Vercel
+3. Configure environment variables
+4. Deploy
 
-### Cookie-Based Storage
+## 🔧 Configuration
 
-Refresh tokens stored in secure cookies with `SameSite=Strict` and `Secure` flags for enhanced security.
+### Environment Variables
 
-### Multi-Tab Synchronization
+| Variable            | Description             | Default                      |
+| ------------------- | ----------------------- | ---------------------------- |
+| `VITE_API_BASE_URL` | API base URL            | `http://localhost:3001/api`  |
+| `VITE_USE_MOCK_API` | Use mock API (dev only) | `true` (dev), `false` (prod) |
 
-Authentication state synced across all browser tabs using storage events. Logout in one tab logs out all tabs.
+### Token Configuration
 
-### Role-Based Access Control
+- **Access Token Expiry**: 15 minutes
+- **Refresh Token Expiry**: 7 days
+- **Refresh Before Expiry**: 2 minutes
+- **Storage**:
+  - Access token: Memory (session)
+  - Refresh token: localStorage (persistent)
 
-Three user roles (`admin`, `user`, `moderator`) with protected routes. Admin-only `/admin` panel included.
-
-## 🌐 Deployment
-
-### Vercel (Recommended)
+## 📝 Scripts
 
 ```bash
-# Install and login
-pnpm add -g vercel
-vercel login
+# Development
+pnpm dev          # Start dev server
 
-# Deploy
-vercel --prod
+# Build
+pnpm build        # Build for production
+
+# Lint
+pnpm lint         # Run ESLint
+
+# Preview
+pnpm preview      # Preview production build
 ```
 
-Set environment variables in Vercel dashboard:
+## 🎯 Key Features Implementation
 
-- `VITE_API_BASE_URL`
-- `VITE_USE_MOCK_API`
+### 1. Axios Interceptors
 
-### Netlify
+- Request interceptor: Automatically attaches access token to all requests
+- Response interceptor: Handles 401 errors and refreshes tokens automatically
 
-```bash
-pnpm build
-# Deploy dist/ folder via Netlify UI or CLI
-```
+### 2. React Query Integration
 
-## 🧪 Testing
+- `useMutation` for login/logout
+- `useQuery` for user data
+- Automatic cache invalidation on auth state changes
 
-### Basic Flow
+### 3. React Hook Form
 
-1. Navigate to home page
-2. Login with demo credentials
-3. View dashboard with user info
-4. Test logout functionality
+- Email validation (pattern matching)
+- Password validation (minimum length)
+- Error message display
+- Form submission handling
 
-### Bonus Features
+### 4. Protected Routes
 
-- **Silent Refresh**: Watch console for auto-refresh logs every 13 minutes
-- **Cookie Storage**: Check DevTools → Application → Cookies for `refreshToken`
-- **Multi-Tab Sync**: Open two tabs, logout in one, observe both logout
-- **RBAC**: Login as admin to access `/admin`, login as user to see access denied
+- Route protection with authentication check
+- Automatic redirect to login for unauthenticated users
+- Preserve return URL for post-login redirect
 
-## � Troubleshooting
+### 5. Token Refresh Scheduler
 
-- **MSW not working**: Check console for initialization messages, verify `VITE_USE_MOCK_API=true`
-- **Token refresh failing**: Check console logs, verify refresh token in cookies
-- **Protected routes not working**: Verify tokens are set, check AuthContext state
+- Automatic token refresh before expiration
+- JWT expiration parsing
+- Scheduled refresh timers
 
-## 🎯 Assignment Completion Checklist
+### 6. Multi-tab Synchronization
 
-### Core Requirements
+- Custom events for token updates
+- Logout synchronization across tabs
+- Token refresh synchronization
 
-- ✅ Authentication flow with login and logout
-- ✅ Access and refresh token implementation
-- ✅ Axios configuration with interceptors
-- ✅ React Query integration
-- ✅ React Hook Form integration
-- ✅ Protected routes implementation
-- ✅ User interface with login, logout, and dashboard
-- ✅ Public hosting (Vercel ready)
-- ✅ Error handling
-- ✅ Mock API backend with MSW
-- ✅ Clean code organization
-- ✅ TypeScript type safety
-- ✅ Modern best practices
+## 🐛 Troubleshooting
 
-### Stretch Goals (Bonus)
+### Token Refresh Issues
 
-- ✅ Silent token refresh before expiration
-- ✅ Cookie-based refresh token storage
-- ✅ Multi-tab authentication synchronization
-- ✅ Role-based access control (RBAC)
+- Check browser console for errors
+- Verify refresh token is stored in localStorage
+- Check API endpoint configuration
+
+### Mock API Not Working
+
+- Ensure `VITE_USE_MOCK_API=true` in `.env.development`
+- Check browser console for errors
+- Verify mock handlers are imported
+
+### Build Issues
+
+- Clear node_modules and reinstall: `rm -rf node_modules && pnpm install`
+- Check TypeScript errors: `pnpm build`
+- Verify environment variables are set
+
+## 📚 Additional Resources
+
+- [React Query Documentation](https://tanstack.com/query/latest)
+- [React Hook Form Documentation](https://react-hook-form.com/)
+- [Axios Documentation](https://axios-http.com/)
+- [Tailwind CSS Documentation](https://tailwindcss.com/)
+- [React Router Documentation](https://reactrouter.com/)
+
+## 📄 License
+
+This project is created for educational purposes as part of a homework assignment.
+
+## 👤 Author
+
+Created as part of Advanced Web Application Development course assignment.
 
 ---
 
-**Deployment URL:** [Insert your Vercel URL here after deployment]
+**Note**: Update the production URL in this README and `SELF_EVALUATION.md` after deploying to Vercel.

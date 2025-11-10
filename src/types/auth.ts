@@ -1,17 +1,3 @@
-/**
- * User authentication and profile types
- */
-
-export type UserRole = 'admin' | 'user' | 'moderator';
-
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  role: UserRole;
-  createdAt?: string;
-}
-
 export interface LoginCredentials {
   email: string;
   password: string;
@@ -23,26 +9,25 @@ export interface AuthTokens {
 }
 
 export interface LoginResponse {
-  user: User;
   accessToken: string;
   refreshToken: string;
+  user: User;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  role?: string;
 }
 
 export interface RefreshTokenResponse {
   accessToken: string;
+  refreshToken?: string;
 }
 
-export interface AuthContextType {
-  user: User | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  login: (credentials: LoginCredentials) => Promise<void>;
-  logout: () => Promise<void>;
-  refreshAccessToken: () => Promise<string>;
-}
-
-export interface ProtectedDataResponse {
+export interface ApiError {
   message: string;
-  data: unknown;
-  timestamp: string;
+  statusCode?: number;
 }
+

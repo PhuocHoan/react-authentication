@@ -1,62 +1,86 @@
-/**
- * Main App Component
- * Sets up routing, authentication, and React Query
- */
-
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { AuthProvider } from './context/AuthContext';
-import { ProtectedRoute } from './components/ProtectedRoute';
-import { RoleBasedRoute } from './components/RoleBasedRoute';
-import { HomePage } from './pages/HomePage';
+import { useEffect } from 'react';
 import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { HomePage } from './pages/HomePage';
 import { AdminPage } from './pages/AdminPage';
+import { UnauthorizedPage } from './pages/UnauthorizedPage';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import { tokenStorage } from './utils/tokenStorage';
+import { scheduleTokenRefresh, clearTokenRefresh } from './utils/tokenRefreshScheduler';
 
-// Create React Query client
+// Create a client for React Query
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
       refetchOnWindowFocus: false,
-      staleTime: 60 * 1000, // 1 minute
-    },
-    mutations: {
-      retry: 0,
+      staleTime: 5 * 60 * 1000, // 5 minutes
     },
   },
 });
 
 function App() {
+  // Initialize token refresh scheduler on app mount
+  useEffect(() => {
+    const accessToken = tokenStorage.getAccessToken();
+    if (accessToken) {
+      scheduleTokenRefresh(accessToken);
+    }
+
+    // Listen for token storage updates from other tabs
+    const handleTokenUpdate = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      if (customEvent.detail?.refreshToken) {
+        // Token was updated in another tab, check if we need to refresh access token
+        const currentAccessToken = tokenStorage.getAccessToken();
+        if (currentAccessToken) {
+          scheduleTokenRefresh(currentAccessToken);
+        }
+      }
+    };
+
+    window.addEventListener('token-storage-updated', handleTokenUpdate);
+    window.addEventListener('auth-logout', () => {
+      clearTokenRefresh();
+      window.location.href = '/login';
+    });
+
+    return () => {
+      window.removeEventListener('token-storage-updated', handleTokenUpdate);
+      window.removeEventListener('auth-logout', () => {});
+    };
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            <Route path='/' element={<HomePage />} />
-            <Route path='/login' element={<LoginPage />} />
-            <Route
-              path='/dashboard'
-              element={
-                <ProtectedRoute>
-                  <DashboardPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path='/admin'
-              element={
-                <RoleBasedRoute allowedRoles={['admin']}>
-                  <AdminPage />
-                </RoleBasedRoute>
-              }
-            />
-            <Route path='*' element={<Navigate to='/' replace />} />
-          </Routes>
-        </AuthProvider>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/unauthorized" element={<UnauthorizedPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </BrowserRouter>
-      <ReactQueryDevtools initialIsOpen={false} />
+      {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>
   );
 }

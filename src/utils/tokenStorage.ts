@@ -1,75 +1,50 @@
-/**
- * Token storage utilities
- * Access token is stored in memory (never in localStorage/cookies for security)
- * Refresh token is stored in secure cookies for persistence and better security
- */
-
-import { cookieUtils } from './cookies';
-
 const REFRESH_TOKEN_KEY = 'refreshToken';
-const REFRESH_TOKEN_EXPIRES_DAYS = 7; // 7 days
+const ACCESS_TOKEN_KEY = 'accessToken';
 
-// In-memory storage for access token (more secure than localStorage)
+// Access token stored in memory (session only)
 let accessToken: string | null = null;
 
+// Refresh token stored in localStorage (persistent)
 export const tokenStorage = {
-  // Access Token (Memory)
-  getAccessToken: (): string | null => {
-    return accessToken;
-  },
+  // Access token (memory)
+  getAccessToken: (): string | null => accessToken,
 
-  setAccessToken: (token: string): void => {
+  setAccessToken: (token: string | null): void => {
     accessToken = token;
   },
 
-  clearAccessToken: (): void => {
-    accessToken = null;
-  },
-
-  // Refresh Token (Secure Cookies - Better than localStorage)
+  // Refresh token (localStorage)
   getRefreshToken: (): string | null => {
-    try {
-      return cookieUtils.get(REFRESH_TOKEN_KEY);
-    } catch (error) {
-      console.error('Error reading refresh token from cookies:', error);
-      return null;
-    }
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem(REFRESH_TOKEN_KEY);
   },
 
-  setRefreshToken: (token: string): void => {
-    try {
-      cookieUtils.set(REFRESH_TOKEN_KEY, token, {
-        expires: REFRESH_TOKEN_EXPIRES_DAYS,
-        secure: true,
-        sameSite: 'strict',
-      });
-
-      // Also broadcast token change to other tabs
-      window.localStorage.setItem('auth:token-update', Date.now().toString());
-    } catch (error) {
-      console.error('Error saving refresh token to cookies:', error);
-    }
-  },
-
-  clearRefreshToken: (): void => {
-    try {
-      cookieUtils.delete(REFRESH_TOKEN_KEY);
-
-      // Broadcast logout to other tabs
-      window.localStorage.setItem('auth:logout', Date.now().toString());
-    } catch (error) {
-      console.error('Error clearing refresh token from cookies:', error);
+  setRefreshToken: (token: string | null): void => {
+    if (typeof window === 'undefined') return;
+    if (token) {
+      localStorage.setItem(REFRESH_TOKEN_KEY, token);
+      // Broadcast to other tabs
+      window.dispatchEvent(new CustomEvent('token-storage-updated', { detail: { refreshToken: token } }));
+    } else {
+      localStorage.removeItem(REFRESH_TOKEN_KEY);
+      window.dispatchEvent(new CustomEvent('token-storage-updated', { detail: { refreshToken: null } }));
     }
   },
 
   // Clear all tokens
-  clearAllTokens: (): void => {
-    tokenStorage.clearAccessToken();
-    tokenStorage.clearRefreshToken();
+  clearTokens: (): void => {
+    accessToken = null;
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(REFRESH_TOKEN_KEY);
+      localStorage.removeItem(ACCESS_TOKEN_KEY);
+      // Broadcast logout to other tabs
+      window.dispatchEvent(new CustomEvent('auth-logout'));
+    }
   },
 
-  // Check if user has valid tokens
-  hasTokens: (): boolean => {
-    return !!tokenStorage.getAccessToken() || !!tokenStorage.getRefreshToken();
+  // Check if user is authenticated (has refresh token)
+  isAuthenticated: (): boolean => {
+    return tokenStorage.getRefreshToken() !== null;
   },
 };
+
