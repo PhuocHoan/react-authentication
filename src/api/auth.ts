@@ -3,7 +3,7 @@ import type { LoginCredentials, LoginResponse, RefreshTokenResponse, User } from
 import { mockApi } from '../mocks/handlers';
 import { tokenStorage } from '../utils/tokenStorage';
 
-const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API !== 'false' && import.meta.env.DEV;
+const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API !== 'false';
 
 export const authApi = {
   // Login
