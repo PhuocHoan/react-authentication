@@ -30,11 +30,10 @@ function App() {
       scheduleTokenRefresh(accessToken);
     }
 
-    // Listen for token storage updates from other tabs
+    // Listen for token storage updates from same tab
     const handleTokenUpdate = (event: Event) => {
       const customEvent = event as CustomEvent;
       if (customEvent.detail?.refreshToken) {
-        // Token was updated in another tab, check if we need to refresh access token
         const currentAccessToken = tokenStorage.getAccessToken();
         if (currentAccessToken) {
           scheduleTokenRefresh(currentAccessToken);
@@ -42,7 +41,22 @@ function App() {
       }
     };
 
+    // Listen for storage changes from other tabs
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === 'refreshToken') {
+        if (event.newValue) {
+          // Token updated in another tab - reload to sync state
+          window.location.reload();
+        } else {
+          // Token removed in another tab - logout
+          clearTokenRefresh();
+          window.location.href = '/login';
+        }
+      }
+    };
+
     window.addEventListener('token-storage-updated', handleTokenUpdate);
+    window.addEventListener('storage', handleStorageChange);
     window.addEventListener('auth-logout', () => {
       clearTokenRefresh();
       window.location.href = '/login';
@@ -50,6 +64,7 @@ function App() {
 
     return () => {
       window.removeEventListener('token-storage-updated', handleTokenUpdate);
+      window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('auth-logout', () => {});
     };
   }, []);

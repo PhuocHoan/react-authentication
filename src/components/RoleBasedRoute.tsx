@@ -25,7 +25,11 @@ export const RoleBasedRoute = ({
     );
   }
 
-  if (!user || (user.role && !allowedRoles.includes(user.role))) {
+  if (!user) {
+    return <Navigate to='/login' replace />;
+  }
+
+  if (user.role && !allowedRoles.includes(user.role)) {
     return <Navigate to='/unauthorized' replace />;
   }
 

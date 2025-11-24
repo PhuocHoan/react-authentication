@@ -73,7 +73,7 @@ export const useAuth = () => {
     user: userQuery.data,
     isLoadingUser: userQuery.isLoading,
     isAuthenticated: tokenStorage.isAuthenticated(),
-    error: loginMutation.error || logoutMutation.error,
+    error: loginMutation.error || logoutMutation.error || userQuery.error,
   };
 };
 

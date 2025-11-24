@@ -5,6 +5,8 @@ import { tokenStorage } from '../utils/tokenStorage';
 
 const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API !== 'false';
 
+import { scheduleTokenRefresh } from '../utils/tokenRefreshScheduler';
+
 export const authApi = {
   // Login
   login: async (credentials: LoginCredentials): Promise<LoginResponse> => {
@@ -38,11 +40,27 @@ export const authApi = {
   // Get current user
   getCurrentUser: async (): Promise<User> => {
     if (USE_MOCK_API) {
-      const accessToken = tokenStorage.getAccessToken();
+      let accessToken = tokenStorage.getAccessToken();
+      
+      // If no access token, try to refresh using refresh token
       if (!accessToken) {
-        throw new Error('No access token');
+        const refreshToken = tokenStorage.getRefreshToken();
+        if (refreshToken) {
+          try {
+            const data = await mockApi.refreshToken(refreshToken);
+            tokenStorage.setAccessToken(data.accessToken);
+            accessToken = data.accessToken;
+            scheduleTokenRefresh(data.accessToken);
+          } catch (error) {
+            tokenStorage.clearTokens();
+            throw new Error('Session expired');
+          }
+        } else {
+          throw new Error('No access token');
+        }
       }
-      return mockApi.getCurrentUser(accessToken);
+      
+      return mockApi.getCurrentUser(accessToken!);
     }
     const response = await apiClient.get<User>('/auth/me');
     return response.data;
