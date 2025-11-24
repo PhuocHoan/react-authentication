@@ -56,7 +56,7 @@ A secure React single-page application implementing JWT authentication with acce
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 24+
 - pnpm (recommended) or npm/yarn
 
 ### Setup
@@ -101,10 +101,11 @@ A secure React single-page application implementing JWT authentication with acce
 
 ## 🧪 Testing with Mock API
 
-The application includes a built-in mock API for testing. Demo credentials:
+The application includes a built-in mock API for testing.
 
-- **Email**: `demo@example.com`
-- **Password**: `password123`
+- Demo credentials:
+  - **Email**: `demo@example.com`
+  - **Password**: `password123`
 
 - **Admin User**:
   - **Email**: `admin@example.com`
