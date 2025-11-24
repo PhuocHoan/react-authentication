@@ -31,12 +31,19 @@ jobs:
         run: pnpm lint
 
   type-check:
-    name: 🟦 Type Check
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
+    name: 🟦 Type Check (Node ${{ matrix.node-version }} - ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node-version: [22, 24]
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup-node-pnpm
+        with:
+          node-version: ${{ matrix.node-version }}
       
       - name: Run Type Check
         # Running tsc directly is faster than full build for just type checking
@@ -54,12 +61,30 @@ jobs:
         # Fails if any vulnerability is found with high or critical severity
         run: pnpm audit --prod --audit-level=high
 
+  test:
+    name: 🧪 Unit Tests (Node ${{ matrix.node-version }} - ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node-version: [22, 24]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup-node-pnpm
+        with:
+          node-version: ${{ matrix.node-version }}
+      
+      - name: Run Tests
+        run: pnpm test --run
+
   # =================================================================================================
   # DEPLOYMENT JOBS
   # =================================================================================================
   deploy-production:
     name: 🚀 Deploy Production
-    needs: [lint, type-check, security-audit]
+    needs: [lint, type-check, security-audit, test]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
