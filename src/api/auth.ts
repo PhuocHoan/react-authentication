@@ -51,7 +51,7 @@ export const authApi = {
             tokenStorage.setAccessToken(data.accessToken);
             accessToken = data.accessToken;
             scheduleTokenRefresh(data.accessToken);
-          } catch (error) {
+          } catch {
             tokenStorage.clearTokens();
             throw new Error('Session expired');
           }
